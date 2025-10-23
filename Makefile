@@ -25,7 +25,7 @@ LIBS = $(LDFLAGS)
 
 OBJECTS_C = get_dates.o init_file_info.o init_par_info.o logfile.o \
 	matlab_functions.o process_raw_avhrr_acspo_c.o process_raw_geo_c.o \
-	read_acspo.o read_geo_data.o read_raw_geo.o read_ghrsst.o \
+	read_acspo_ghrsst.o read_geo_data.o read_raw_geo.o read_ghrsst.o \
 	read_netcdf.o diurnal_warming.o process_raw_geo_ghrsst_c.o read_geo_ghrsst.o \
 	process_raw_amsr_ghrsst_c.o read_amsr_ghrsst.o
 
@@ -56,8 +56,10 @@ process_raw_avhrr_acspo_c.o: process_raw_avhrr_acspo_c.c types_cnsts.h logfile.h
 	$(CC) $(INCLUDE) $(C_FLAGS) $(CFLAGS) -c process_raw_avhrr_acspo_c.c
 process_raw_geo_c.o: process_raw_geo_c.c types_cnsts.h logfile.h init_file_info.h matlab_functions.h read_geo_data.h process_raw_geo_c.h
 	$(CC) $(INCLUDE) $(C_FLAGS) $(CFLAGS) -c process_raw_geo_c.c
-read_acspo.o: read_acspo.c types_cnsts.h logfile.h init_par_info.h matlab_functions.h read_acspo.h read_ghrsst.h init_par_info.h
-	$(CC) $(INCLUDE) $(INCLUDE_HDF) $(C_FLAGS) $(CFLAGS) -c read_acspo.c
+#read_acspo.o: read_acspo.c types_cnsts.h logfile.h init_par_info.h matlab_functions.h read_acspo.h read_ghrsst.h init_par_info.h
+#	$(CC) $(INCLUDE) $(INCLUDE_HDF) $(C_FLAGS) $(CFLAGS) -c read_acspo.c
+read_acspo_ghrsst.o: read_acspo_ghrsst.c types_cnsts.h logfile.h init_par_info.h matlab_functions.h read_acspo.h read_ghrsst.h init_par_info.h
+	$(CC) $(INCLUDE) $(INCLUDE_HDF) $(C_FLAGS) $(CFLAGS) -c read_acspo_ghrsst.c
 read_geo_data.o: read_geo_data.c types_cnsts.h logfile.h init_par_info.h init_file_info.h matlab_functions.h get_dates.h read_raw_geo.h read_geo_data.h
 	$(CC) $(INCLUDE) $(C_FLAGS) $(CFLAGS) -c read_geo_data.c
 read_raw_geo.o: read_raw_geo.c types_cnsts.h logfile.h init_par_info.h matlab_functions.h read_ghrsst.h read_raw_geo.h
