@@ -1,20 +1,27 @@
 CC = gcc
 #MEX = /data/starfs1/compilers/matlabR2013b/bin/mex
-MEX = /data/starfs1/compilers/matlabR2019a/bin/mex
+#MEX = /data/starfs1/compilers/matlabR2019a/bin/mex
+MEX = /sw/matlab/R2024a/bin/mex
 
 #C_FLAGS = -fPIC -O
-C_FLAGS = -fPIC -Wall -g
+C_FLAGS = -fPIC -Wall -g -Dfinite=isfinite
 M_FLAGS = -g
 
 INCLUDE = -I.
 
-INCLUDE_HDF = -I/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/include
-LIBS_HDF = -L/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/lib -lmfhdf -ldf -ljpeg -lz 
+MATLABROOT = /sw/matlab/R2024a
 
-INCLUDE_NETCDF = -I/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/include
-LIBS_NETCDF = -L/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/lib -lnetcdf
+INCLUDE_NETCDF = -I$(MATLABROOT)/extern/include
+INCLUDE_HDF = -I$(MATLABROOT)/extern/include
 
-LIBS = $(LIBS_HDF) $(LIBS_NETCDF) 
+#INCLUDE_HDF = -I/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/include
+#LIBS_HDF = -L/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/lib -lmfhdf -ldf -ljpeg -lz 
+
+#INCLUDE_NETCDF = -I/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/include
+#LIBS_NETCDF = -L/data/data008/pub/jmittaz/POES_GOES/c_code_andy/lib/lib -lnetcdf
+
+LDFLAGS = -L$(MATLABROOT)/bin/glnxa64 -lnetcdf -lhdf5 -lz -lm #for Linux 64-bit )x86_64 architecture)
+LIBS = $(LDFLAGS)
 
 OBJECTS_C = get_dates.o init_file_info.o init_par_info.o logfile.o \
 	matlab_functions.o process_raw_avhrr_acspo_c.o process_raw_geo_c.o \
