@@ -54,9 +54,9 @@ static VINT read_acspo_hdf( const char *pFilename, struct int_struct *pTime,
 			    struct float_struct *pLat, 
 			    struct float_struct *pLon, 
 			    struct char_struct  *pCldmask );
-static VINT readHdfData_flt( const int32 sd_id, const char *pName, VINT *nx, VINT *ny, 
-			     float **ppVar );
-static VINT readHdfData_byte( const int32 sd_id, const char *pName, VINT *nx, VINT *ny, 
+static VINT readHdfData_flt( const int32_t sd_id, const char *pName, VINT *nx, VINT *ny, 
+                            float **ppVar ); /* Fri17/10/2025: int32 > int32_t */
+static VINT readHdfData_byte( const int32_t sd_id, const char *pName, VINT *nx, VINT *ny, 
 			      char **ppVar );
 /*
  * NAME: 
@@ -133,7 +133,7 @@ VINT read_acspo( const char *pFilename, const char *pAcspo_format,
 		 struct char_struct  *pCldmask, 
 		 struct float_struct *pSSES_Variance,
 		 const struct par_info_type par_info,
-		 const VINT correct_bias, const VFLOAT sses_stdev )
+		 const VINT correct_bias, const VFLOAT sses_stdev ) /* char > VINT */
 {
   /* Local variables */
   VINT ok = 0;
@@ -192,7 +192,7 @@ VINT read_acspo( const char *pFilename, const char *pAcspo_format,
     ok = read_ghrsst( pFilename, &Time, pSST, pLat, pLon, pSSES_Variance,
 		      "ACSPO", pCldmask, 0,
 		      correct_bias, sses_stdev, 
-		      par_info.acspo_ghrsst_min_quality, 0, 0. );  /* Couple of extra parameters (min_algorithm, min_windspeed) - only for SLSTR @present */
+		      par_info.acspo_ghrsst_min_quality, 0, 0. ); /* Momoe copied from the read_acspo.c in OneDrive */
     if( 1 == ok ){
       free_int_matlab(&Time);
       free_float_matlab(pSST);
@@ -204,7 +204,7 @@ VINT read_acspo( const char *pFilename, const char *pAcspo_format,
     }
   } else {
     /* Can't recognize ACPSO format type */
-    message(1,"ERROR: Unrecognized ACSPO format (not HDF or GHRSST)");
+    message(1,"ERROR: Unrecognized ACSPO format (not HDF, netCDF or GHRSST)");
     return(1);
   }
 
@@ -315,9 +315,9 @@ static VINT read_acspo_hdf( const char *pFilename, struct int_struct *pTime,
   VINT stop_time = 0;
   VFLOAT deltaTime = 0.;
 
-  int32 sd_id = 0;
-  int32 status = 0;
-  int32 attr_index = 0;
+  int32_t sd_id = 0;
+  int32_t status = 0;
+  int32_t attr_index = 0;
 
   /* Open file */
   sd_id = SDstart(pFilename,DFACC_READ);
@@ -596,18 +596,18 @@ static VINT read_acspo_hdf( const char *pFilename, struct int_struct *pTime,
  *   Original version by Jonathan P.D. Mittaz on 02/12/2011
  *
  */
-static VINT readHdfData_flt( const int32 sd_id, const char *pName, VINT *nx, VINT *ny, 
+static VINT readHdfData_flt( const int32_t sd_id, const char *pName, VINT *nx, VINT *ny, 
 			     float **ppVar )
 { 
   intn status = 0;
-  int32 dim_size[2];
-  int32 rank = 0;
-  int32 data_type = 0;
-  int32 n_attr = 0;
-  int32 sds_index = 0;
-  int32 sds_id = 0;
-  int32 start[2];
-  int32 edge[2];
+  int32_t dim_size[2];
+  int32_t rank = 0;
+  int32_t data_type = 0;
+  int32_t n_attr = 0;
+  int32_t sds_index = 0;
+  int32_t sds_id = 0;
+  int32_t start[2];
+  int32_t edge[2];
   char outName[MAX_STRING_LENGTH];
 
   /* Get sds_index given name */
@@ -750,18 +750,18 @@ static VINT readHdfData_flt( const int32 sd_id, const char *pName, VINT *nx, VIN
  *   Original version by Jonathan P.D. Mittaz on 02/12/2011
  *
  */
-static VINT readHdfData_byte( const int32 sd_id, const char *pName, VINT *nx, VINT *ny, 
+static VINT readHdfData_byte( const int32_t sd_id, const char *pName, VINT *nx, VINT *ny, 
 			      char **ppVar )
 { 
   intn status = 0;
-  int32 dim_size[2];
-  int32 rank = 0;
-  int32 data_type = 0;
-  int32 n_attr = 0;
-  int32 sds_id = 0;
-  int32 sds_index = 0;
-  int32 start[2];
-  int32 edge[2];
+  int32_t dim_size[2];
+  int32_t rank = 0;
+  int32_t data_type = 0;
+  int32_t n_attr = 0;
+  int32_t sds_id = 0;
+  int32_t sds_index = 0;
+  int32_t start[2];
+  int32_t edge[2];
   char outName[MAX_STRING_LENGTH];
 
   /* Get sds_index given name */

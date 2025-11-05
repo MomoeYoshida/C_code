@@ -68,6 +68,7 @@
 #include "process_raw_avhrr_acspo_c.h"
 /*#include "process_raw_amsr_ghrsst_c.h"*/
 #include "diurnal_warming.h"
+#include "read_amsr_ghrsst.h" // Momoe added
 
 /* Internally defined structures */
 /* Structure to hold each cells list of SSTs for further analysis */

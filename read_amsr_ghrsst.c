@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include <mfhdf.h>
+//#include <mfhdf.h> /* Momoe commented out */
 
 /* header for this routine */
 #include "types_cnsts.h"

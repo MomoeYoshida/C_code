@@ -30,6 +30,9 @@
  *
  */
 
+#include <math.h>
+#define finite(x) isfinite(x)
+
 /* Standard C library headers */
 #include <stdlib.h>
 #include <stdio.h>

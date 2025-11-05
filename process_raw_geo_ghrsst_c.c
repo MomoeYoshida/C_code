@@ -1,5 +1,5 @@
-/*
- * NAME: 
+/* TNT: Edit below headhers for process_raw_geo_ghrsst_c.
+ * NAME:
  *
  *    process_raw_avhrr_acspo_c
  *
@@ -430,7 +430,7 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
 
   /* Get datestring - get_datestring2 specific for AVHRR */
   /* For GHRSST format */
-  strncpy(datestring,get_ghrsst_datestring(year,day),MAX_STRING_LENGTH);
+  strncpy(datestring,get_ghrsst_datestring(year,day),MAX_STRING_LENGTH); /* yyyymmdd */
 
   /* Set minimum SST from previous days analysis which is an input - also set the max */
   sst_min = par_info.sst_analysis_min - 2.;
@@ -491,13 +491,13 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
       }
       /* Get search string */
       found_goes = 0;
-      for(i=0;i<ngoes_number;i++){
+      for(i=0;i<ngoes_number;i++){ /* Loop through all possible GOES satellites */
 	if( 0 == strcmp(pType,"p") ){
 		sprintf(searchString,"%s/%s*-*L2P_GHRSST-SSTskin-GOES%d-*.nc",
 			file_info.dir_mtsat,datestring,goes_number[i]);
 	} else {
 		sprintf(searchString,"%s/%s*-*L2P_GHRSST-SST*G*%02d-*.nc",
-			file_info.dir_goes,datestring,goes_number[i]);
+			file_info.dir_goes,datestring,goes_number[i]); /* !!! */
 	}
 	if( 0 != find_files(searchString,&nFiles,&ppFilelist) ){
 	  found_goes = 1;
@@ -629,7 +629,7 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
     /* Note, if requested, diurnal warming is corrected for within read_acspo */
     if( 0 == read_geo_ghrsst( *(ppFilelist+i), acspo_format, &SST, &Lat, &Lon, 
 			 &CldMask, &SST_Variance, par_info, correct_bias, 
-			 sses_stdev ) ){
+			 sses_stdev ) ){ /* !!! */
       /* Remove 273.15 from SST */
       subtract_float_array_matlab(&SST,ABS_ZERO);
       /* Loop round for day and night for seperate processing */

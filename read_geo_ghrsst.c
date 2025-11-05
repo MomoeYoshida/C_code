@@ -36,7 +36,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include <mfhdf.h>
+//#include <mfhdf.h> /* Momoe commented out */
 
 /* header for this routine */
 #include "types_cnsts.h"
@@ -149,7 +149,7 @@ VINT read_geo_ghrsst( const char *pFilename, const char *pAcspo_format,
 
   if((myPtr = strstr(pFilename, "ACSPO")) == NULL)
     {
-    /*  If can't find "ACSPO" in filename, it's a "regular" Geo SST L2P...  */
+    /*  If can't find "ACSPO" in filename, it's a "regular" Geo SST L2P... (e.g., mio)  */
     ok = read_ghrsst( pFilename, &Time, pSST, pLat, pLon, pSSES_Variance,
 		    "GEO", pCldmask, 0,
 		    correct_bias, sses_stdev, 
@@ -186,6 +186,8 @@ VINT read_geo_ghrsst( const char *pFilename, const char *pAcspo_format,
   return(ok);
 }
 
+
+/* Fri17/10/2025: comment out below because HDF4 is no longer used in the system */
 /*
  * NAME: 
  *

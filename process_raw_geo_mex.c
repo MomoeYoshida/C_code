@@ -198,6 +198,11 @@
  *
  */
 void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+/*
+ nlhs: number of left-hand side outputs
+ plhs: pointers
+ nrhs: number of right-hand side inputs
+ */
 {
   /* Local variables */
   char type[MAX_STRING_LENGTH];
@@ -211,7 +216,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   VINT sst_check = 0;
   char stringval[MAX_STRING_LENGTH];
-  char logfile_stream[MAX_STRING_LENGTH];
+  char logfile_stream[MAX_STRING_LENGTH]; /* e.g., 'mio' */
   char matlab_home[MAX_STRING_LENGTH];
 
   struct sst_struct Ref_SST;
@@ -281,7 +286,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   /* check that bias_day is double 2-d array */
   /* If not make array and set to zero */
   if( (0 == mxIsDouble(prhs[6])) || (0 == mxIsNumeric(prhs[6])) || 
-      (2 != mxGetNumberOfDimensions(prhs[6])) ){
+      (2 != mxGetNumberOfDimensions(prhs[6])) ){ /* mxIsDouble returns logical 1 ( true ) */
     bias_day = 1;
   } else {
     bias_day = 0;
@@ -404,12 +409,12 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   } else {
     allocate_float_array_matlab(Ref_SST.sst.nx,Ref_SST.sst.ny,&BiasDay);
     /* Make sure that it is zeroed */
-    memset(BiasDay.array,0,sizeof(VFLOAT)*Ref_SST.sst.size);
+    memset(BiasDay.array,0,sizeof(VFLOAT)*Ref_SST.sst.size); /* sets every value in the bias field to 0.0 */
   }
 
   /* Check bias (daytime) sizes */
   if( (BiasDay.nx != Ref_SST.sst.nx) || 
-      (BiasDay.nx != Ref_SST.sst.nx) ){
+      (BiasDay.nx != Ref_SST.sst.nx) ){ /* not .ny ?? */
     mexErrMsgIdAndTxt("MEX:process_raw_geo_mex",
 		      "BiasDay and ref_sst have incompatible sizes");
   }
@@ -436,8 +441,8 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   /* Call C code */
   /* GHRSST-specific geo processing defined here */
 
-  if( 0 == strncmp(par_info.geo_format,"GHRSST",6) ){
-    ok = process_raw_geo_ghrsst_c( type, year, day, &Ref_SST, 
+  if( 0 == strncmp(par_info.geo_format,"GHRSST",6) ){ /* Momoe: this is our condition. */
+    ok = process_raw_geo_ghrsst_c( type, year, day, &Ref_SST,
 			    &SST_Variability, sst_check, &BiasDay,
 			    &BiasNight, &OutData[0], par_files );
   } else {
@@ -471,11 +476,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       plhs[5] = mxCreateString(stringval);
     } else {
       /* Set all to logical false */
-      plhs[1] = mxCreateLogicalScalar(0);
-      plhs[2] = mxCreateLogicalScalar(0);
-      plhs[3] = mxCreateLogicalScalar(0);
-      plhs[4] = mxCreateLogicalScalar(0);
-      plhs[5] = mxCreateLogicalScalar(0);
+      plhs[1] = mxCreateLogicalScalar(0); /* day_there based on 'process_raw_mio_c.m' */
+      plhs[2] = mxCreateLogicalScalar(0); /* sst_day */
+      plhs[3] = mxCreateLogicalScalar(0); /* stdvals_day */
+      plhs[4] = mxCreateLogicalScalar(0); /* gridcount_day */
+      plhs[5] = mxCreateLogicalScalar(0); /* pixel_extent_day */
     }
 
     /* If nighttime selected */

@@ -245,7 +245,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
 				struct int_struct *pDumpArray,
 				VINT *pTotal_badclim,
 				VINT *pTotal_badstd,
-				const struct par_files_str par_files )
+				const struct par_files_str par_files ) /* what is VINT?? */
 {
   /* Local variabiles */
 /*  char correct_bias = 0;
@@ -299,7 +299,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
   struct float_struct SST_Variance;
   struct char_struct CldMask;
 
-  char **ppFilelist = NULL;
+  char **ppFilelist = NULL; /* going to store a list of filenames */
   char directory_nav[MAX_STRING_LENGTH];
   char directory_sst[MAX_STRING_LENGTH];
   char daystr[MAX_STRING_LENGTH];
@@ -611,7 +611,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
     use_sses_stdev = par_info.viirs_use_sses_stdev;
     strcpy(acspo_format,par_info.viirs_acspo_format);
     break;
-  case JPSS:
+  case JPSS: /* NOAA_20/21 */
     /* Check to see if there is an entry */
     if( 0 == strlen(file_info.dir_jpss_nav) ){
       message(1,"ERROR: dir_jpss_nav/sst is not defined");
@@ -764,7 +764,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
       break;
     case JPSS:  
       sprintf(searchStr,"%s/%s*-L2P_GHRSST-*VIIRS*_*.nc",directory_sst,
-	      datestring);
+	      datestring); /* format data into string vector */
       break;
     }
   } else if( 1 == use_NETCDF ){
@@ -809,7 +809,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
   }
 
   /* Get filelist */
-  if( 0 == find_files(searchStr,&nFiles,&ppFilelist) ){
+  if( 0 == find_files(searchStr,&nFiles,&ppFilelist) ){ /* comes from matlab_functions.c */
     message(3,"*** NOAA directory is ",directory_sst,".");
     /* Output instrument type specific error message */
     if( NOAA_16 <= noaa_no ){
@@ -865,12 +865,12 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
   }
 
   /* Now loop round files */
-  for(i=0;i<nFiles;i++){
+  for(i=0;i<nFiles;i++){ /* nFiles: a number of files found */
     /* Read in acspo data */
     /* Note, if requested, diurnal warming is corrected for within read_acspo */
     if( 0 == read_acspo( *(ppFilelist+i), acspo_format, &SST, &Lat, &Lon, 
 			 &CldMask, &SST_Variance, par_info, correct_bias, 
-			 sses_stdev ) ){
+			 sses_stdev ) ){ /* *(ppFilelist+i): equivalent to ppFilelist[i] */
       /* Remove 273.15 from SST */
       subtract_float_array_matlab(&SST,ABS_ZERO);
       /* Loop round for day and night for seperate processing */
@@ -915,7 +915,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
 		ypos = (ypos % pRef_SST->sst.ny);
 		
 		/* Check against climatology */
-		pos = xpos+ypos*pClimArray->nx;
+		pos = xpos+ypos*pClimArray->nx; /* the linear index of the grid cell */
 		if( 0 > pos ){
 		  message(1,
 			  "ERROR: pos < 0 to add to storage (process_raw_avhrr_acspo_c.c)");
@@ -1167,7 +1167,7 @@ void cleanup_plus_mean_stdev_sst_data( const struct SST_Storage *pStored_SST,
     /* Loop round storage structure */
     for(i=0;i<pStored_SST->nx*pStored_SST->ny;i++){
       /* Check to make sure we have some data stored */
-      nstored = *(pStored_SST->pNStored+i);
+      nstored = *(pStored_SST->pNStored+i); /* Retrieve the i-th value from the array pNStored (inside pStored_SST) and store it into the variable nstored. */
       if( 0 < nstored ){
 	/* Test against number of SSTs - if < min_avhrr_obs_per_cell then use 
 	 * default */
@@ -1221,7 +1221,7 @@ void cleanup_plus_mean_stdev_sst_data( const struct SST_Storage *pStored_SST,
 	/* Store values */
 	*(pOutput->SST.array+i) = mean;
 	*(pOutput->Stdev.array+i) = stdev;      
-	*(pOutput->Gridcnt.array+i) = nstored;      
+	*(pOutput->Gridcnt.array+i) = nstored; /* pOutput->Gridcnt.array[i] = nstored; */
       } else {
 	/* No data available */
 	/* Set to NaN */
@@ -1495,7 +1495,8 @@ void add_to_storage(const VFLOAT sst, const VFLOAT variance,
   struct float_struct1d *pArray = NULL;
   struct float_struct1d *pArray_Var = NULL;
 
-  nstored = *(pStorage->pNStored+pos)+1;
+  /* Count the number of SST values stored in this specific grid cell: Increment number stored */
+  nstored = *(pStorage->pNStored+pos)+1; /* nstored = pStorage->pNStored[pos] + 1; */
   
   /* Check to see if we need to allocate more memory for this slot */
   pArray = (pStorage->pSST+pos);

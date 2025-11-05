@@ -195,6 +195,8 @@ VINT read_ghrsst( const char *pFilename, struct int_struct *pTime,
   VFLOAT deltaTime = 0.;
 
   VINT day2 = 0;
+    
+    char status_error_string[256];
 
   if( NULL != strstr(pFilename,"_NRT_DUAL") ){
     /* Sentinel-3 "Day-2" dual-view product */
@@ -205,7 +207,9 @@ VINT read_ghrsst( const char *pFilename, struct int_struct *pTime,
   status = nc_open(pFilename,NC_NOWRITE,&nc_id);
   if( NC_NOERR != status ){
     message(2,"ERROR: Cannot open GHRSST file ",pFilename);
-    /* EXIT open fail */
+    sprintf(status_error_string, "nc_open error %d", status);
+    message(1,status_error_string);
+   /* EXIT open fail */
     return(1);
   }
 
@@ -441,7 +445,7 @@ VINT read_ghrsst( const char *pFilename, struct int_struct *pTime,
       }
     }
     
-    /* Get solar zenith angle to choose day/night */
+    /* Get solar zenith angle (at the time of satellite observation) to choose day/night */
     if( 1 == readNetCDFData_Byte_float(nc_id,"solar_zenith_angle",nx,ny,pVar) ){
       message(2,
 	      "ERROR: Error reading solar_zenith_angle from GHRSST file ",
@@ -455,7 +459,7 @@ VINT read_ghrsst( const char *pFilename, struct int_struct *pTime,
       free_float_matlab(pLon);
       /* EXIT error in read */
       return(1);
-    }
+    } /* !!! */
     /* Get GHRSST quality flag */
     if( 1 == readNetCDFData_byte(nc_id,"quality_level",nx,ny,pByte) ){
       message(2,
@@ -479,14 +483,14 @@ VINT read_ghrsst( const char *pFilename, struct int_struct *pTime,
       }
     }
 
-    /* Now simply reuse to flag day/night */
+    /* Now simply reuse to flag day/night */ /* !!! */
     for(i=0;i<nx*ny;i++){
       if( (0. <= *(pVar+i)) && (90. > *(pVar+i)) ){	/*  Fix due to wrapping above 127 in byte var  */
-      /* Daytime */
-	*(pByte+i) = 0;
+      /* Daytime */  /* 0º <= SZA < 90º */
+	*(pByte+i) = 0; /* daytime flag */
       } else {
-      /* Nighttime */					/*  Angles >127 were wrapping to -128,-127, etc. */
-	*(pByte+i) = 1;					/*  Exclude data with -128 as that is badVal...? */
+      /* Nighttime */  /* 90º <= SZA */	 /*  Angles >127 were wrapping to -128,-127, etc. */
+	*(pByte+i) = 1; /* nighttime flag */			/*  Exclude data with -128 as that is badVal...? */
       }
     }
 
@@ -846,7 +850,7 @@ VINT readNetCDFData_flt( int nc_id, const char *pName, size_t nx,
   size_t start[2] = {0,0};
   size_t count[2] = {0,0};
 
-  /* Get variable ID */
+  /* Get variable ID, Look for a variable (pName) */
   status = nc_inq_varid( nc_id, pName, &varid );
   if( NC_NOERR != status ){
     message(2,"ERROR: Cannot get varID for ",pName);
@@ -1524,7 +1528,7 @@ static VINT readNetCDFData_Byte_float( int nc_id, const char *pName,
   /* Get variable ID */
   status = nc_inq_varid( nc_id, pName, &varid );
   if( NC_NOERR != status ){
-    message(2,"ERROR: Cannot get varID for ",pName);
+    message(2,"ERROR: Cannot get varID for ",pName); /* could not find */
     return(1);
   }
   
