@@ -32,6 +32,7 @@
 
 /* prototypes */
 #include "mex_functions.h"
+#include "matlab_functions.h" /* Momoe added */
 
 /*
  * NAME: 
