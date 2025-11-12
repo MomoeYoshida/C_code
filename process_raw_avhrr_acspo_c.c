@@ -313,7 +313,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
 
   /* Storage structure */
   /* Note - dimension of 2 for day/night */
-  struct SST_Storage Stored_SST[2];
+  struct SST_Storage Stored_SST[2]; /* Define an array called Stored_SST that contains two instances of the struct SST_Storage. */
 
   char use_GHRSST = 0;
   char use_NETCDF = 0;
@@ -927,7 +927,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
 		  /* Add to storage structure */
 		  nkeep[daynight] += 1;
 		  add_to_storage(*(SST.array+j),*(SST_Variance.array+j),
-				 pos,&Stored_SST[daynight]);
+				 pos,&Stored_SST[daynight]); /* Put data into link list structure */
 		} else {
 		  /* Rejected due to climatology check - count number of times */
 		  *((pDumpArray+daynight)->array+pos) += 1;
@@ -957,7 +957,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
   
   /* Now have read in all ACSPO data */
   /* Now we have to do filtering and calculation of standard deviation/means
-   * in each cell of analysis */
+   * in each cell of analysis */ /* Momoe: for AGU25 analysis? */
 
   /* Setup output arrays - loop round day/night as appropriate */
   for(daynight=start_day_night;daynight<=end_day_night;daynight++){
@@ -1098,7 +1098,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
  *   stdev_threshold - threshold to apply clean and also default value
  *   stdev_default   - default value to use when standard deviation cannot be
  *                     calculated
- *   use_sses_stdev  - use any SSTS/Standard deviation for weighted average
+ *   use_sses_stdev  - flag (0/1), use any SSTS/Standard deviation for weighted average
  *
  * OUTPUTS:  
  * 
@@ -1113,6 +1113,7 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
  * HISTORY:
  * 
  *   Original version by Jonathan P.D. Mittaz on 09/01/2012
+ *   Momoe Yoshida on 10/11/2025: Add a thinning logic
  *
  */
 void cleanup_plus_mean_stdev_sst_data( const struct SST_Storage *pStored_SST, 
@@ -1164,22 +1165,48 @@ void cleanup_plus_mean_stdev_sst_data( const struct SST_Storage *pStored_SST,
      * clean */
     *pNBadStd = 0;
 
-    /* Loop round storage structure */
+    /* Loop round storage structure */ /* Momoe: TNT: indentation below, currently using spaces */
     for(i=0;i<pStored_SST->nx*pStored_SST->ny;i++){
-      /* Check to make sure we have some data stored */
+      /* Check to make sure we have some data stored (any SST observations) */
       nstored = *(pStored_SST->pNStored+i); /* Retrieve the i-th value from the array pNStored (inside pStored_SST) and store it into the variable nstored. */
       if( 0 < nstored ){
-	/* Test against number of SSTs - if < min_avhrr_obs_per_cell then use 
-	 * default */
-	pArr = (pStored_SST->pSST+i);
-	pArr_Var = (pStored_SST->pSST_Variance+i);
+	  /* Test against number of SSTs - if < min_avhrr_obs_per_cell then use
+	  * default */
+	   pArr = (pStored_SST->pSST+i); /* hold all values for the current grid cell */
+	   pArr_Var = (pStored_SST->pSST_Variance+i);
+          
+       /* Optional random thinning block, Momoe */
+          if (par_info.thinning == 1 && par_info.thinning_ratio < 1.0) {
+              VINT nkeep = (VINT)(nstored * par_info.thinning_ratio);
+              if (nkeep < 1) nkeep = 1;  /* keep at least one, minimum # of L2P */
+              
+              /* Shuffle indices using a simple deterministic random sequence; a Fisher–Yates shuffle-like method */
+              srand(par_info.seed_base + i); /* ensure repeatability */
+              /* Loop over all SSTs in the current cell */
+              for (j = 0; j < nstored; j++) {
+                  VINT k = rand() % nstored; /* Generate a random index k between 0 and nstored-1 */
+                  /* Swap SST values */
+                  VFLOAT temp = pArr->array[j];
+                  pArr->array[j] = pArr->array[k];
+                  pArr->array[k] = temp;
+                  /* Swap variance values, ensure SST values and their corresponding variances aligned */
+                  temp = pArr_Var->array[j];
+                  pArr_Var->array[j] = pArr_Var->array[k];
+                  pArr_Var->array[k] = temp;
+              }
+              
+              /* Keep only first nkeep elements */
+              nstored = nkeep;
+          }
+          
+    /* If more than or equal to 5 SST observations */
 	if( par_info.min_avhrr_obs_per_cell <= nstored ){
 	  /* Determine standard deviation */
 	  if( 1 == use_sses_stdev ){
 	    stdev = std_matlab_weighted(pArr->array,pArr_Var->array,0,
 					nstored,&mean);
 	  } else {
-	    stdev = std_matlab(pArr->array,0,nstored,&mean);
+	    stdev = std_matlab(pArr->array,0,nstored,&mean); /* return the mean via a pointer */
 	  }
 	  /* If standard devation > threshold - run clean algorithm */
 	  if( stdev_threshold < stdev ){	
@@ -1210,18 +1237,19 @@ void cleanup_plus_mean_stdev_sst_data( const struct SST_Storage *pStored_SST,
 	    } else {
 	      mean /= weight_sum;
 	    }
-	  } else {
+	  } else { /* unweighted average — every observation contributes equally */
 	    mean = 0.;
 	    for(j=0;j<nstored;j++){
 	      mean += *(pArr->array+j);
 	    }
-	    mean /= nstored;
+	    mean /= nstored; /* divide the sum by the count */
 	  }
 	}
 	/* Store values */
 	*(pOutput->SST.array+i) = mean;
 	*(pOutput->Stdev.array+i) = stdev;      
 	*(pOutput->Gridcnt.array+i) = nstored; /* pOutput->Gridcnt.array[i] = nstored; */
+    /* End of "if( 0 < nstored )" */
       } else {
 	/* No data available */
 	/* Set to NaN */

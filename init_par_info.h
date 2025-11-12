@@ -322,6 +322,9 @@ struct par_info_type {
   VFLOAT mio_maxlat;
   VINT start_day_night;
   VINT end_day_night;
+  VINT thinning;
+  VFLOAT thinning_ratio;  /* Fraction of L2P samples to retain per grid cell (0–1) */
+  VINT seed_base;
 };
 
 /* This has visibility outside this module */

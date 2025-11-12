@@ -2863,6 +2863,41 @@ void init_par_info( const char *parInfoFile )
     }
   }
 
+    /* Momoe: Copy from the other use_** parameter */
+    if( 1 == find_key(fp,"thinning",string) ){
+      message(1,"thinning keyword not found in parameters file");
+      ok = 1;
+    } else {
+      if( 1 != sscanf(string,"%d",&par_info.thinning) ){
+        message(1,"thinning keyword not parsable in parameters file");
+        ok = 1;
+      }
+      if( (0 != par_info.thinning) && (1 != par_info.thinning) ){
+        message(1,"noaa16_use_sses_stdev keyword not 0/1 in parameters file");
+        ok = 1;
+      }
+    }
+
+  if( 1 == find_key(fp,"thinning_ratio",string) ){
+    message(1,"thinning_ratio keyword not found in parameters file — using default (1.0)");
+    ok = 1;
+  } else {
+      if( 1 != sscanf(string,"%lf",&par_info.thinning_ratio) ){
+      message(1,"Invalid thinning_ratio format in parameters file — using default (1.0)");
+      ok = 1;
+    }
+  }
+    
+    if( 1 == find_key(fp,"seed_base",string) ){
+      message(1,"seed_base keyword not found in parameters file");
+      ok = 1;
+    } else {
+      if( 1 != sscanf(string,"%d",&par_info.seed_base) ){
+        message(1,"seed_base keyword not found in parameters file");
+        ok = 1;
+      }
+    }
+
   /* Code below is for the new parameters */
 
   /* Get the output grid (reference) start position */

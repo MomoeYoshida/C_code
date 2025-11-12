@@ -767,7 +767,7 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
     cleanup_plus_mean_stdev_sst_data( &Stored_SST[daynight], 
 				      (pOutdata+daynight), 
 				      par_info.std_threshold, 
-				      std_default, &nBadStd, use_sses_stdev );
+				      std_default, &nBadStd, use_sses_stdev ); /* Definition in process_raw_avhrr_acspo_c.c */
   
   /* A final check to set all pixels with a count of zero to NaN */
 
