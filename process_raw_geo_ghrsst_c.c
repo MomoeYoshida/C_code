@@ -349,8 +349,8 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
     mult_float_array_matlab(&Threshold_Day, par_info.goes_threshold_mult);
     add_float_array_matlab(&Threshold_Day, par_info.goes_threshold_constant);
     /* Night threshold for quality control - identical for geo data */
-    mult_float_array_matlab(&Threshold_Night, par_info.goes_threshold_mult);
-    add_float_array_matlab(&Threshold_Night, par_info.goes_threshold_constant);
+    mult_float_array_matlab(&Threshold_Night, par_info.goes_threshold_mult); /* multiplied by 2 */
+    add_float_array_matlab(&Threshold_Night, par_info.goes_threshold_constant); /* added 1 */
     std_default_day = par_info.default_goes_std_e;
     std_default_night = par_info.default_goes_std_e;
   } else if( (0 == strstr("w",pType)) ){
@@ -438,7 +438,7 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
 
   /* Nighttime corrected dataset */
   /* Note that this routine allocates compare_SST */
-  array_float_oper_matlab(&pRef_SST->sst,"-",pBiasNight,&compare_sst_Night);
+  array_float_oper_matlab(&pRef_SST->sst,"-",pBiasNight,&compare_sst_Night); /* reference SST minus bias_night = compare_sst_Night */
 
   /* Daytime */
   array_float_oper_matlab(&pRef_SST->sst,"-",pBiasDay,&compare_sst_Day);
@@ -687,7 +687,7 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
 	      /* a 1 in Mask is good data */
 	      if( 1 == *(Mask.array+j) ){
 		/* Good data */
-		/* Now based on lat/lon, determine which cell this is in */
+		/* Now based on lat/lon, determine which cell (the reference L3 grid) this is in */
 		xpos = (*(Lat.array+j)-pRef_SST->minlat)/ref_deltalat;
 		xpos = (xpos % pRef_SST->sst.nx);
 		ypos = (*(Lon.array+j)-pRef_SST->minlon)/ref_deltalon;
@@ -702,7 +702,7 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
 		  exit(-1);
 		}
 		if( fabs(*(SST.array+j) - *(pClimArray->array+pos)) < 
-		    *(pClimThresh->array+pos) ){
+		    *(pClimThresh->array+pos) ){ /* climatology check using threshold: whether the observation is close enough to climatology/reference SST */
 		  /* Add to storage structure */
 		  nkeep[daynight] += 1;
 		  add_to_storage(*(SST.array+j),*(SST_Variance.array+j),
@@ -780,13 +780,26 @@ VINT process_raw_geo_ghrsst_c( const char *pType, const VINT year,
 
     /* Output number of bad entries etc. */
     nreject = nBadStd + badclim[daynight];
+    
+      /* ============================
+             DEBUG THIN SUMMARY (Momoe)
+             ============================ */
+  int tot_gc = 0;
+  int nonzero = 0;
+  int ii;
 
-    /* Output message */
+  for (ii = 0; ii < pOutdata->Gridcnt.size; ii++) {
+      int g = pOutdata->Gridcnt.array[ii];
+      tot_gc += g;
+      if (g > 0) nonzero++;
+  }
+
+      /* Output message */
     if( 0 > sprintf(messageStr,
-		     "*** For GEO GHRSST %s data (date %s) keeping %d & rejecting %d : (clim check) %d : (std check) %d",
+		     "*** For GEO GHRSST %s data (date %s) keeping %d & rejecting %d : (clim check) %d : (std check) %d: total_gridcount=%d",
 		    nameStr,
 		    datestring,nkeep[daynight],nreject,
-		    badclim[daynight],nBadStd) ){
+		    badclim[daynight],nBadStd,tot_gc) ){ /* doesn't change before/after thinning */
       message(1,"ERROR: Writing message string for GEO GHRSST");
       /* EXIT */
       exit(-1);

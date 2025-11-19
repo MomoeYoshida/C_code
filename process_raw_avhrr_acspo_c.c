@@ -336,7 +336,13 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
 
   /* Inits files/pars */
   init_file_info(par_files.file_info);
-  init_par_info(par_files.par_info);
+  init_par_info(par_files.par_info); /* Reads in a file containing parameters (init_par_info.m). */
+//    mexPrintf("DEBUG thinning=%d ratio=%f seed=%d\n",
+//              par_info.thinning,
+//              par_info.thinning_ratio,
+//              par_info.seed_base);
+//
+//    mexEvalString("drawnow;");   // forces flush to MATLAB output
 
   /* Convert input name string to unique ID */
   strcpy(nameStr,noaa_name);
@@ -992,18 +998,31 @@ VINT process_raw_avhrr_acspo_c( const char *noaa_name, const VINT year,
   
     /* Output number of bad entries etc. */
     nreject = nBadStd + badclim[daynight];
+      
+      /* ============================
+             DEBUG THIN SUMMARY (Momoe)
+             ============================ */
+  int tot_gc = 0;
+  int nonzero = 0;
+  int ii;
 
-    /* Output message */
+  for (ii = 0; ii < pOutdata->Gridcnt.size; ii++) {
+      int g = pOutdata->Gridcnt.array[ii];
+      tot_gc += g;
+      if (g > 0) nonzero++;
+  }
+
+      /* Output message */
     if( 0 > sprintf(messageStr,
-		     "*** For ACSPO %s data (date %s) keeping %d & rejecting %d : (clim check) %d : (std check) %d",
+		     "*** For ACSPO %s data (date %s) keeping %d & rejecting %d : (clim check) %d : (std check) %d: total_gridcount=%d \n*** DEBUG: thinning=%d thinning_ratio=%f seed_base=%d",
 		    nameStr,
 		    datestring,nkeep[daynight],nreject,
-		    badclim[daynight],nBadStd) ){
+		    badclim[daynight],nBadStd,tot_gc,par_info.thinning, par_info.thinning_ratio, par_info.seed_base) ){
       message(1,"ERROR: Writing message string for ACSPO");
       /* EXIT */
       exit(-1);
     }
-    message(1,messageStr);  
+    message(1,messageStr);
 
     /* Copy badclim/badstd to output */
     *(pTotal_badclim+daynight) = badclim[daynight];
