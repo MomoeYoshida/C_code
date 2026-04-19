@@ -5,7 +5,7 @@ CC = gcc # this will still invoke Clang on macOS
 
 # Path to the mex directory.
 #MEX = /Applications/MATLAB_R2025b.app/bin/mex # for MacBook Pro (MomoeYoshida Oct2025)
-MEX = /sw/matlab/R2024a/bin/mex # for JCU HPC
+MEX = /gpfs01/sw/matlab/R2024a/bin/mex # for JCU HPC
 
 #C_FLAGS = -fPIC -O
 #C_FLAGS = -fPIC -Wall -g
