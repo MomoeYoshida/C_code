@@ -328,10 +328,10 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   }
 
   /* Setup par_info files */
-  strcpy(par_files.par_info, matlab_home);
-  strcat(par_files.par_info, "/Software/init_par_info.m");
-  strcpy(par_files.file_info, matlab_home);
-  strcat(par_files.file_info, "/Software/init_file_info.m");
+  strcpy(par_files.par_info, getenv("SST_ENV"));
+  strcat(par_files.par_info, "/init_par_info.m");
+  strcpy(par_files.file_info, getenv("SST_ENV"));
+  strcat(par_files.file_info, "/init_file_info.m");
 
   /* Get par_info data */
   init_par_info( par_files.par_info );

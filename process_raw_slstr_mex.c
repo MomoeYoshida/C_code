@@ -399,10 +399,10 @@ fprintf(stderr, "process_raw_slstr_mex: # %d\n", idebug);
 ++idebug;
 #endif
   /* Setup par_info files */
-  strcpy(par_files.par_info, matlab_home);
-  strcat(par_files.par_info, "/Software/init_par_info.m");
-  strcpy(par_files.file_info, matlab_home);
-  strcat(par_files.file_info, "/Software/init_file_info.m");
+  strcpy(par_files.par_info, getenv("SST_ENV"));
+  strcat(par_files.par_info, "/init_par_info.m");
+  strcpy(par_files.file_info, getenv("SST_ENV"));
+  strcat(par_files.file_info, "/init_file_info.m");
 
 #ifdef DEBUG
 fprintf(stderr, "process_raw_slstr_mex: # %d\n", idebug);
